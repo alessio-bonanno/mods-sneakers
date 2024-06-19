@@ -1,0 +1,23 @@
+:root
+{
+    --navbar-height: 5rem;
+}
+
+main
+{
+    padding-top: var(--navbar-height);
+}
+
+#toast-container
+{
+    position: absolute;
+    top: .5rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.toast
+{
+    position: relative;
+    margin-top: .3rem;
+}
