@@ -1,11 +1,26 @@
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400..800&display=swap');
+
 :root
 {
     --navbar-height: 5rem;
 }
 
+body
+{
+    font-family: "Baloo 2", sans-serif;
+    font-style: normal;
+    font-weight: normal;
+}
+
+header
+{
+    font-size: 21px;
+}
+
 main
 {
-    padding-top: var(--navbar-height);
+    margin-top: var(--navbar-height);
+    font-size: 18px;
 }
 
 #toast-container

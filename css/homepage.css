@@ -1,0 +1,50 @@
+:root
+{
+    --banner-height: 3rem;
+}
+
+#banner
+{
+    position: absolute;
+    background-color: black;
+    height: var(--banner-height);
+}
+
+#banner > div
+{
+    position: relative;
+    width: fit-content;
+    text-wrap: nowrap;
+}
+
+#banner video
+{
+    object-fit: fill;
+    position: absolute;
+    height: 100%;
+    width: 100%;
+}
+
+#banner h1
+{
+    font-weight: bold;
+    mix-blend-mode: multiply;
+    color: white;
+    background-color: black;
+    height: 100%;
+    font-size: 45px;
+}
+
+main
+{
+    padding-top: var(--banner-height);
+}
+
+@media (min-width: 576px)
+{
+    #banner h1
+    {
+        font-size: 55px;
+        line-height: 100%;
+    }
+}
