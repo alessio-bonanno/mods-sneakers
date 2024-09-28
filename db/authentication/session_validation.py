@@ -21,11 +21,11 @@ def session_validation(req: Request, session_id: UUID) -> SessionValidResponse |
     if(user_session is None):
         return get_error(ERROR_STATUS_CODES.SESSION_NOT_FOUND)
     if(bool(user_session["should_expire"]) is False):
-        return SessionValidResponse(headers={"cache-control": "max-age=31536000"})
+        return SessionValidResponse()
 
     delta = user_session["timestamp_expire"] - datetime.now()
     if(delta.days >= 0):
-        return SessionValidResponse(headers={"cache-control": f"max-age={delta.seconds}"})
+        return SessionValidResponse()
 
     cursor.execute(f"DELETE FROM session WHERE id='{session_id}'")
     return get_error(ERROR_STATUS_CODES.SESSION_EXPIRED)
