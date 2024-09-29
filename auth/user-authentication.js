@@ -9,6 +9,22 @@ const authEndpoints = new Endpoints({
 
 
 
+function getAuthenticationError(errorCode)
+{
+    switch(errorCode)
+    {
+        case 10: return "Username già esistente";
+        case 11: return "Email già esistente";
+        case 12: return "Username non trovato";
+        case 13: return "Password errata";
+        case 14: return "Non esiste utente con l'email inserita";
+        case 15: return "Sessione non valida";
+        case 16: return "Sessione scaduta";
+        default: return "Errore sconosciuto";
+    }
+}
+
+
 function pathRedirect(redirectEndpoint, target)
 {
     const params = new URLSearchParams(location.search);

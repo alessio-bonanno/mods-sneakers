@@ -10,22 +10,17 @@ const popoverInputErrorTemplate = `
 
 
 const panelContainer = document.getElementById("panel-container");
-function showPanel(panelName)
+function showPanel(panelName, panelSendCallback)
 {
-    Array.from(panelContainer.children).forEach(panel =>
-        panel.setAttribute("style", `display: ${panel.id == `${panelName}-panel` ? "visible" : "none"};`)
-    );
-}
+    const panels = Array.from(panelContainer.children);
+    const panel = panels.find(p => p.id == `${panelName}-panel`);
 
-function getAuthenticationError(errorCode)
-{
-    switch(errorCode)
+    panels.forEach(p => p.style.display = p.id == panel.id ? "" : "none");
+    panel.onkeyup = ({ key }) =>
     {
-        case 10: return "Username non trovato";
-        case 11: return "Password errata";
-        case 12: return "Non esiste utente con l'email inserita";
-        default: return "Errore sconosciuto";
-    }
+        if(!key || key.toLowerCase() != "enter") return;
+        panelSendCallback();
+    };
 }
 
 
@@ -42,17 +37,18 @@ const loginPanel = {
 
         toggleSpinner(loginButton);
 
-        const body = JSON.stringify({
-            username,
-            password: btoa(this.passwordInput.value),
-            shouldRemember: this.shouldRememberBox.checked
+        const res = await authEndpoints.fetch(authEndpoints.login, {
+            method: "post", payload: {
+                username,
+                password: btoa(this.passwordInput.value),
+                should_expire: !this.shouldRememberBox.checked
+            }
         });
-        const res = await fetch(endpoints.login, { method: "post", body, headers: { "Content-Type": "application/json" } });
 
         toggleSpinner(loginButton);
 
-        if(res.status >= 200 && res.status < 300) saveSession((await res.json()).sessionId);
-        else if(res.status == 401) new Toast("danger", getAuthenticationError((await res.json()).errorCode)).render();
+        if(res.status >= 200 && res.status < 300) saveSession((await res.json()).session_id);
+        else if(res.status == 401) new Toast("danger", getAuthenticationError((await res.json()).error_code)).render();
         else new Toast("danger", "Errore imprevisto").render();
     }
 };
@@ -84,17 +80,17 @@ const passwordValidation = {
 
     showErrors(invalidOptions, passwordElement)
     {
-        Array.from(passwordElement.querySelectorAll(".popover, .error-input")).forEach(element => element.remove());
+        Array.from(passwordElement.querySelectorAll(".popover, .error-input")).forEach(el => el.remove());
 
         const errorsText = this.errors();
-        const errorsPopover = new FromTemplate(this.popoverErrorTemplate).replace(errorsText).create();
+        const errorsPopover = new FromTemplate(this.popoverErrorTemplate).replace(errorsText).create().result;
 
         Object.keys(invalidOptions).forEach(key =>
         {
             const check = errorsPopover.querySelector(`#${key}-check`);
             const hasFailed = invalidOptions[key];
-            check.setAttribute("class", `bi bi-${hasFailed ? "x-circle" : "check-all"}`);
-            check.setAttribute("style", `color: ${hasFailed ? "red" : "green"};`);
+            check.classList.add("bi", `bi-${hasFailed ? "x-circle" : "check-all"}`);
+            check.style.color = hasFailed ? "red" : "green";
         });
 
         passwordElement.append(errorsPopover);
@@ -134,13 +130,13 @@ const signupPanel = {
             email: { element: this.emailInput.parentElement, text: "L'email non è valida" },
             name: { element: this.nameInput.parentElement, text: "Il nome non può contenere numeri" },
             lastName: { element: this.lastNameInput.parentElement, text: "Il cognome non può contenere numeri" },
-            gender: { element: document.querySelector("#gender-choice").parentElement, text: "Il sesso è obbligatorio" }
+            gender: { element: document.getElementById("gender-choice").parentElement, text: "Il sesso è obbligatorio" }
         };
     },
 
     showErrors(invalidElements)
     {
-        Array.from(document.querySelectorAll(".popover, .error-input")).forEach(element => element.remove());
+        Array.from(document.querySelectorAll(".popover, .error-input")).forEach(el => el.remove());
 
         const errors = this.errors();
 
@@ -149,7 +145,7 @@ const signupPanel = {
             if(!invalidElements[key]) return;
 
             const { element, text } = errors[key];
-            element.append(new FromTemplate(popoverInputErrorTemplate).replace({ text }).create());
+            element.append(new FromTemplate(popoverInputErrorTemplate).replace({ text }).create().result);
         });
     },
 
@@ -157,13 +153,13 @@ const signupPanel = {
     {
         const usernameRegex = /^[a-z][a-z1-9]{4,14}$/;
         const emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
-        const nameRegex = /^[a-z][a-z]{2,19}$/;
+        const nameRegex = /^[a-z][a-z]{2,29}$/;
         const invalidElements = {};
 
         invalidElements.username = !usernameRegex.test(this.usernameInput.value.toLowerCase());
         invalidElements.password = !passwordValidation.getInputValidation(this.passwordInput).valid;
         invalidElements.passwordConfirm = this.passwordConfirmInput.value != this.passwordInput.value;
-        invalidElements.email = !emailRegex.test(this.emailInput.value);
+        invalidElements.email = !(emailRegex.test(this.emailInput.value) && this.emailInput.value.length <= 40);
         invalidElements.name = !nameRegex.test(this.nameInput.value.toLowerCase());
         invalidElements.lastName = !nameRegex.test(this.lastNameInput.value.toLowerCase());
         invalidElements.gender = !this.getGenderInput();
@@ -171,28 +167,28 @@ const signupPanel = {
         return { valid: !Object.values(invalidElements).some(Boolean), invalidElements };
     },
 
-    capitalize: str => str[0].toUpperCase() + str.slice(1).toLowerCase(),
-
     async send()
     {
         const inputValidation = this.getInputValidation();
         if(!inputValidation.valid) return this.showErrors(inputValidation.invalidElements);
 
-        toggleSpinner(signupSendButton);
+        toggleSpinner(signupButton);
 
-        const body = JSON.stringify({
-            username: this.usernameInput.value.toLowerCase(),
-            password: btoa(this.passwordInput.value), // algoritmo IN-DE-CI-FRA-BI-LE
-            email: this.emailInput.value,
-            name: this.capitalize(this.nameInput.value),
-            last_name: this.capitalize(this.lastNameInput.value),
-            gender: this.getGenderInput().value
+        const res = await authEndpoints.fetch(authEndpoints.signup, {
+            method: "post", payload: {
+                username: this.usernameInput.value.toLowerCase(),
+                password: btoa(this.passwordInput.value), // algoritmo IN-DE-CI-FRA-BI-LE
+                email: this.emailInput.value,
+                name: capitalize(this.nameInput.value),
+                last_name: capitalize(this.lastNameInput.value),
+                gender: this.getGenderInput().value
+            }
         });
-        const res = await fetch(endpoints.signup, { method: "post", body, headers: { "Content-Type": "application/json" } });
 
-        toggleSpinner(signupSendButton);
+        toggleSpinner(signupButton);
 
-        if(res.status >= 200 && res.status < 300) saveSession((await res.json()).sessionId);
+        if(res.status >= 200 && res.status < 300) saveSession((await res.json()).session_id);
+        else if(res.status == 409) new Toast("danger", getAuthenticationError((await res.json()).error_code)).render();
         else new Toast("danger", "Errore imprevisto").render();
     }
 };
@@ -213,7 +209,7 @@ const forgotPasswordPanel = {
 
     showErrors(invalidElements)
     {
-        Array.from(document.querySelectorAll(".popover, .error-input")).forEach(element => element.remove());
+        Array.from(document.querySelectorAll(".popover, .error-input")).forEach(el => el.remove());
 
         const errors = this.errors();
 
@@ -222,7 +218,7 @@ const forgotPasswordPanel = {
             if(!invalidElements[key]) return;
 
             const { element, text } = errors[key];
-            element.append(new FromTemplate(popoverInputErrorTemplate).replace({ text }).create());
+            element.append(new FromTemplate(popoverInputErrorTemplate).replace({ text }).create().result);
         });
     },
 
@@ -243,46 +239,49 @@ const forgotPasswordPanel = {
         const inputValidation = this.getInputValidation();
         if(!inputValidation.valid) return this.showErrors(inputValidation.invalidElements);
 
-        toggleSpinner(forgotPasswordSendButton);
+        toggleSpinner(forgotPasswordButton);
 
-        const body = JSON.stringify({
-            email: this.emailInput.value,
-            password: btoa(this.passwordInput.value)
+        const res = await authEndpoints.fetch(authEndpoints.forgotPassword, {
+            method: "patch", payload: {
+                email: this.emailInput.value,
+                password: btoa(this.passwordInput.value)
+            }
         });
-        const res = await fetch(endpoints.forgotPassword, { method: "post", body, headers: { "Content-Type": "application/json" } });
 
-        toggleSpinner(forgotPasswordSendButton);
+        toggleSpinner(forgotPasswordButton);
 
-        if(res.status >= 200 && res.status < 300) saveSession(null, "/");
-        else if(res.status == 403) new Toast("danger", getAuthenticationError((await res.json()).errorCode)).render();
+        if(res.status >= 200 && res.status < 300) saveSession(null, "/auth");
+        else if(res.status == 401) new Toast("danger", getAuthenticationError((await res.json()).error_code)).render();
         else new Toast("danger", "Errore imprevisto").render();
     }
-}
+};
 
 
-const brand = document.querySelector("main > h1");
 const loginButton = document.getElementById("login-button");
-const signupButton = document.querySelector("#register > button");
-const signupSendButton = document.getElementById("signup-button");
-const forgotPasswordButton = document.querySelector(".credentials > .contain-items > button");
-const forgotPasswordSendButton = document.getElementById("forgot-password-button");
-const alreadySignupButton = document.querySelector("#already-register > button");
+const signupButton = document.getElementById("signup-button");
+const forgotPasswordButton = document.getElementById("forgot-password-button");
+const signupPanelButton = document.querySelector("#register > button");
+const forgotPasswordPanelButton = document.querySelector(".credentials > .contain-items > button");
+const alreadySignupPanelButton = document.querySelector("#already-register > button");
+const loginPanelBind = loginPanel.send.bind(loginPanel);
+const signupPanelBind = signupPanel.send.bind(signupPanel);
+const forgotPasswordPanelBind = forgotPasswordPanel.send.bind(forgotPasswordPanel);
 
-brand.addEventListener("click", () => location.href = "/");
-loginButton.addEventListener("click", () => loginPanel.send());
-signupButton.addEventListener("click", () => showPanel("signup"));
-signupSendButton.addEventListener("click", () => signupPanel.send());
-forgotPasswordButton.addEventListener("click", () => showPanel("forgot-password"));
-forgotPasswordSendButton.addEventListener("click", () => forgotPasswordPanel.send());
-alreadySignupButton.addEventListener("click", () => showPanel("login"));
+loginButton.addEventListener("click", loginPanelBind);
+signupButton.addEventListener("click", signupPanelBind);
+forgotPasswordButton.addEventListener("click", forgotPasswordPanelBind);
+signupPanelButton.addEventListener("click", () => showPanel("signup", signupPanelBind));
+forgotPasswordPanelButton.addEventListener("click", () => showPanel("forgot-password", forgotPasswordPanelBind));
+alreadySignupPanelButton.addEventListener("click", () => showPanel("login", loginPanelBind));
 
-["focus", "keyup"].forEach(e => document.querySelectorAll(".show-password-errors").forEach(el => el.addEventListener(e, ({ target }) =>
-    passwordValidation.showErrors(passwordValidation.getInputValidation(target).invalidOptions, target.parentElement)
+
+const passwordInputs = document.querySelectorAll(".show-password-errors");
+["focus", "keyup"].forEach(event => passwordInputs.forEach(input => input.addEventListener(event, () =>
+    passwordValidation.showErrors(passwordValidation.getInputValidation(input).invalidOptions, input.parentElement)
 )));
 
-window.addEventListener("load", async () =>
+window.addEventListener("load", () =>
 {
-    if(!await getIsUserAuthenticated()) return;
-
-    // use other icons in the navbar
+    if(getLocalSessionId()) return pathRedirect();
+    showPanel("login", loginPanelBind);
 });
