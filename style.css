@@ -1,27 +1,36 @@
 :root
 {
-    --banner-height: 3rem;
+    --banner-height: 100vh;
+    --carousel-height: 45vh;
+    --carousel-width: 90vw;
 }
 
 #banner
 {
-    position: absolute;
+    display: flex;
     background-color: black;
     height: var(--banner-height);
+    width: 100%;
+    align-items: center;
+    user-select: none;
 }
 
 #banner > div
 {
-    position: relative;
-    width: fit-content;
-    text-wrap: nowrap;
+    display: flex;
+    align-items: center;
+    position: sticky;
+    top: var(--navbar-height);
+    width: 100%;
+    text-align: center;
+    container-type: inline-size;
 }
 
 #banner video
 {
     object-fit: fill;
     position: absolute;
-    height: 100%;
+    height: 95%;
     width: 100%;
 }
 
@@ -32,19 +41,84 @@
     color: white;
     background-color: black;
     height: 100%;
+    width: 100%;
+    letter-spacing: -.5px;
+    margin-bottom: auto;
+    font-size: 8cqw;
+}
+
+#trending-carousel
+{
+    margin-top: 10rem;
+}
+
+#latest-carousel
+{
+    margin-top: .5rem;
+    margin-bottom: 3rem;
+}
+
+.carousel
+{
+    width: var(--carousel-width);
+    margin-left: auto;
+    margin-right: auto;
+    filter: drop-shadow(0 0 1rem var(--palette-green));
+    user-select: none;
+}
+
+.carousel-title
+{
+    position: absolute;
+    width: 100%;
+    z-index: 1;
+    color: white;
     font-size: 45px;
+    text-align: center;
+    font-weight: 500;
+    letter-spacing: -3px;
+    color: var(--palette-green);
 }
 
-main
+.carousel-inner
 {
-    padding-top: var(--banner-height);
+    height: var(--carousel-height);
+    border-radius: 1rem;
+    background-color: var(--palette-dark-grey);
 }
 
-@media (min-width: 576px)
+.open-product-btn
 {
-    #banner h1
+    position: absolute;
+    top: 10%;
+    height: 80%;
+    width: 100%;
+    z-index: 1;
+}
+
+.carousel-item > img
+{
+    height: var(--carousel-height);
+    object-fit: contain;
+    transition: transform .3s ease-in;
+}
+
+.open-product-btn:hover ~ .carousel-item > img
+{
+    transform: scale(1.3);
+}
+
+@media (min-width: 768px)
+{
+    :root
     {
-        font-size: 55px;
-        line-height: 100%;
+        --carousel-height: 45vh;
+        --carousel-width: 78vw;
+    }
+
+    .carousel-title
+    {
+        font-size: 69px;
+        margin-top: -16px;
     }
 }
