@@ -1,0 +1,210 @@
+:root
+{
+    --shoe-items-container-size: 80vw;
+    --checkout-box-sm-height: 8rem;
+}
+
+#checkout-confirm
+{
+    position: absolute;
+    z-index: 1;
+    visibility: hidden;
+    padding: 2rem;
+    width: 100vw;
+    text-align: center;
+    font-size: 10vw;
+}
+
+#checkout-confirm i::before
+{
+    color: var(--palette-green);
+    transform: translateY(-3rem);
+    opacity: 0.3;
+    transition: transform 1.5s, opacity 1.5s;
+}
+
+#checkout-confirm h1
+{
+    transform: translateY(3rem);
+    opacity: 0.3;
+    transition: transform 1.5s, opacity 1.5s;
+}
+
+#checkout-confirm.init
+{
+    visibility: visible;
+}
+
+#checkout-confirm.init i::before,
+#checkout-confirm.init h1
+{
+    transform: none;
+    opacity: 1;
+}
+
+#shoes-container-wrapper
+{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem 0 calc(var(--checkout-box-sm-height) + 2rem);
+}
+
+#shoes-container
+{
+    overflow: hidden;
+    border: 3px solid var(--palette-dark-grey);
+    border-radius: 1rem;
+    background-color: var(--palette-dark-grey);
+}
+
+#shoes-container:empty
+{
+    border: none;
+    border-radius: 0;
+}
+
+.shoe-item
+{
+    width: var(--shoe-items-container-size);
+    /* fix un gap tra il bordo e l'immagine del primo .shoe-item */
+    background-image: linear-gradient(to bottom, var(--palette-dark-grey) 3%, white 3%);
+}
+
+.shoe-item h3
+{
+    color: var(--palette-green);
+}
+
+.shoe-item.remove-item-transition,
+#shoes-container.remove-item-transition
+{
+    overflow: hidden;
+    /* così vicino e così lontano css-tricks.com/transitioning-to-auto-height */
+    height: 0 !important;
+    border-top-width: 0;
+    transition: height 1s, border-width .5s .7s;
+}
+
+.img-container
+{
+    height: 15rem;
+    background-color: var(--palette-dark-grey);
+}
+
+.img-container img
+{
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.change-quantity
+{
+    align-items: center;
+    border: 1.5px solid black;
+}
+
+.change-quantity input
+{
+    width: 5rem;
+    text-align: center;
+}
+
+.change-quantity button
+{
+    padding: 0 .5rem;
+}
+
+.change-quantity .svg-image
+{
+    background-color: black;
+    width: 1rem;
+}
+
+#go-checkout-box
+{
+    position: fixed;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: var(--checkout-box-sm-height);
+    background-color: var(--palette-wheat);
+    border-top-left-radius: .5rem;
+    border-top-right-radius: .5rem;
+}
+
+#go-checkout-box button
+{
+    position: relative;
+    width: 80%;
+    height: fit-content;
+    background-color: var(--palette-green);
+    color: white;
+}
+
+#go-checkout-box button i
+{
+    /* content: "˃"; */
+    position: absolute;
+    right: .5rem;
+}
+
+@media (min-width: 992px)
+{
+    #shoes-container-wrapper
+    {
+        align-items: unset;
+        padding: 2rem 0 2rem 1rem;
+        width: var(--shoe-items-container-size);
+        height: auto;
+    }
+
+    .shoe-item
+    {
+        width: auto;
+        border: 3px solid var(--palette-dark-grey);
+        border-radius: 1rem;
+        background-image: linear-gradient(to right, var(--palette-dark-grey) 3%, white 3%);
+    }
+
+    .img-container
+    {
+        padding: 2rem;
+        height: auto;
+    }
+
+    .img-container img
+    {
+        width: 15rem;
+    }
+
+    #go-checkout-box
+    {
+        top: var(--navbar-height);
+        right: 0;
+        bottom: auto;
+        flex-direction: column;
+        justify-content: unset;
+        align-items: unset;
+        padding: 5rem 1rem;
+        width: calc(100vw - var(--shoe-items-container-size) - 2rem);
+        height: calc(100vh - var(--navbar-height));
+        border-top-left-radius: 1rem;
+        border-bottom-left-radius: 1rem;
+        border-top-right-radius: 0;
+        transition: transform 2s;
+    }
+
+    #go-checkout-box button
+    {
+        width: auto;
+    }
+
+    #go-checkout-box button:last-child
+    {
+        margin-top: auto;
+    }
+}
