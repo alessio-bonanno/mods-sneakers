@@ -8,7 +8,7 @@ from uuid import UUID
 
 
 class SessionValidResponse(SuccessfulResponse):
-    headers: dict[str, str]
+    headers: dict[str, str] = {}
 
 def get_session_invalid_models():
     return {401: {"model": ErrorResponse}, 404: {"model": ErrorResponse}}
