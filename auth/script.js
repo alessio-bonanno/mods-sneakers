@@ -1,26 +1,15 @@
+const popoverInputErrorTemplate = `
+<div id="signup-error-popover" style="display: contents;">
+    <div class="popover bs-popover-bottom"><div class="popover-arrow"></div></div>
+    <div class="error-input">
+        <span><i class="bi bi-exclamation-circle-fill"></i>{text}</span>
+    </div>
+</div>
+`;
+
+
+
 const panelContainer = document.getElementById("panel-container");
-const endpoints = {
-    login: "/api/v1/login",
-    signup: "/api/v1/signup",
-    sessionInfo: "/api/v1/session"
-};
-
-
-
-function pathRedirect(redirectEndpoint)
-{
-    const params = new URLSearchParams(location.search);
-    const paramsRedirectEndpoint = params.get("to");
-
-    location.href = redirectEndpoint || paramsRedirectEndpoint || "/";
-}
-
-function saveSession(sessionId, redirectEndpoint)
-{
-    localStorage.setItem("auth", JSON.stringify({ sessionId }));
-    pathRedirect(redirectEndpoint);
-}
-
 function showPanel(panelName)
 {
     Array.from(panelContainer.children).forEach(panel =>
@@ -39,16 +28,6 @@ function getAuthenticationError(errorCode)
     }
 }
 
-async function getIsUserAuthenticated()
-{
-    const auth = localStorage.getItem("auth");
-    if(!auth || !auth.sessionId) return;
-
-    const body = JSON.stringify({ sessionId: auth.sessionId });
-    const res = await fetch(endpoints.sessionInfo, { method: "post", body, headers: { "Content-Type": "application/json" } });
-
-    return res.status >= 200 && res.status < 300;
-}
 
 const loginPanel = {
     usernameInput: document.getElementById("username-login-input"),
@@ -77,6 +56,7 @@ const loginPanel = {
         else new Toast("danger", "Errore imprevisto").render();
     }
 };
+
 
 const passwordValidation = {
     popoverErrorTemplate: `
@@ -136,14 +116,6 @@ const passwordValidation = {
     }
 };
 
-const popoverInputErrorTemplate = `
-<div id="signup-error-popover" style="display: contents;">
-    <div class="popover bs-popover-bottom"><div class="popover-arrow"></div></div>
-    <div class="error-input">
-        <span><i class="bi bi-exclamation-circle-fill"></i>{text}</span>
-    </div>
-</div>
-`;
 
 const signupPanel = {
     usernameInput: document.getElementById("username-signup-input"),
@@ -224,6 +196,7 @@ const signupPanel = {
         else new Toast("danger", "Errore imprevisto").render();
     }
 };
+
 
 const forgotPasswordPanel = {
     emailInput: document.getElementById("email-forgot-input"),
