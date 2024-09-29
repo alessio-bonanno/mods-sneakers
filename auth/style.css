@@ -1,9 +1,15 @@
-main > h1
+@import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css");
+
+main > a,
+main > a:hover,
+main > a:focus
 {
     font-weight: bolder;
     font-size: 65px;
-    cursor: pointer;
+    line-height: 1.2;
     height: fit-content;
+    letter-spacing: -7px;
+    color: var(--palette-red);
 }
 
 #panel-container
@@ -14,7 +20,7 @@ main > h1
 
 .panel
 {
-    width: 27rem;
+    width: 95vw;
     padding-bottom: .3rem;
     background-color: wheat;
     border: 1px solid wheat;
@@ -40,7 +46,8 @@ main > h1
     padding-top: 1rem;
 }
 
-.credentials > .contain-items > button, .small-link > button
+.credentials > .contain-items > button,
+.small-link > button
 {
     background: none;
     border: none;
@@ -58,16 +65,12 @@ main > h1
     margin-right: .5rem;
 }
 
-#login-button, #signup-button, #forgot-password-button
+#login-button,
+#signup-button,
+#forgot-password-button
 {
     margin-top: 1rem;
     width: 100%;
-}
-
-.spinner-border
-{
-    width: 1rem;
-    height: 1rem;
 }
 
 .small-link
@@ -118,4 +121,12 @@ main > h1
 {
     color: red;
     margin-right: .5rem;
+}
+
+@media (min-width: 576px)
+{
+    .panel
+    {
+        width: 27rem;
+    }
 }

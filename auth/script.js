@@ -123,7 +123,7 @@ const signupPanel = {
     passwordConfirmInput: document.getElementById("password-signup-confirm-input"),
     emailInput: document.getElementById("email-input"),
     nameInput: document.getElementById("name-input"),
-    surnameInput: document.getElementById("surname-input"),
+    lastNameInput: document.getElementById("last-name-input"),
     getGenderInput: () => document.querySelector("#gender-choice :checked"),
     errors()
     {
@@ -133,7 +133,7 @@ const signupPanel = {
             passwordConfirm: { element: this.passwordConfirmInput.parentElement, text: "Le password non corrispondono" },
             email: { element: this.emailInput.parentElement, text: "L'email non è valida" },
             name: { element: this.nameInput.parentElement, text: "Il nome non può contenere numeri" },
-            surname: { element: this.surnameInput.parentElement, text: "Il cognome non può contenere numeri" },
+            lastName: { element: this.lastNameInput.parentElement, text: "Il cognome non può contenere numeri" },
             gender: { element: document.querySelector("#gender-choice").parentElement, text: "Il sesso è obbligatorio" }
         };
     },
@@ -165,7 +165,7 @@ const signupPanel = {
         invalidElements.passwordConfirm = this.passwordConfirmInput.value != this.passwordInput.value;
         invalidElements.email = !emailRegex.test(this.emailInput.value);
         invalidElements.name = !nameRegex.test(this.nameInput.value.toLowerCase());
-        invalidElements.surname = !nameRegex.test(this.surnameInput.value.toLowerCase());
+        invalidElements.lastName = !nameRegex.test(this.lastNameInput.value.toLowerCase());
         invalidElements.gender = !this.getGenderInput();
 
         return { valid: !Object.values(invalidElements).some(Boolean), invalidElements };
@@ -185,7 +185,7 @@ const signupPanel = {
             password: btoa(this.passwordInput.value), // algoritmo IN-DE-CI-FRA-BI-LE
             email: this.emailInput.value,
             name: this.capitalize(this.nameInput.value),
-            surname: this.capitalize(this.surnameInput.value),
+            last_name: this.capitalize(this.lastNameInput.value),
             gender: this.getGenderInput().value
         });
         const res = await fetch(endpoints.signup, { method: "post", body, headers: { "Content-Type": "application/json" } });
