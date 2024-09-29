@@ -1,32 +1,56 @@
-const endpoints = {
-    login: "/api/v1/login",
-    signup: "/api/v1/signup",
-    sessionInfo: "/api/v1/session"
-};
+const authEndpoints = new Endpoints({
+    session: "/session/{sessionId}",
+    sessionInfo: "/session/{sessionId}/info",
+    signup: "/signup",
+    login: "/login",
+    logout: "/logout",
+    forgotPassword: "/forgot-password"
+}, "/user/auth");
 
 
 
-function pathRedirect(redirectEndpoint)
+function pathRedirect(redirectEndpoint, target)
 {
     const params = new URLSearchParams(location.search);
     const paramsRedirectEndpoint = params.get("to");
+    const endpoint = redirectEndpoint || paramsRedirectEndpoint || "/";
 
-    location.href = redirectEndpoint || paramsRedirectEndpoint || "/";
+    if(target) window.open(endpoint, target);
+    else location.href = endpoint;
 }
 
 function saveSession(sessionId, redirectEndpoint)
 {
-    localStorage.setItem("auth", JSON.stringify({ sessionId }));
+    localStorage.setItem("auth", JSON.stringify({ sessionId })); // cookie? cosa sono? si mangiano?
     pathRedirect(redirectEndpoint);
+}
+
+function getLocalSessionId()
+{
+    const authString = localStorage.getItem("auth");
+    if(!authString) return null;
+
+    const auth = JSON.parse(authString);
+
+    return auth.sessionId || null;
 }
 
 async function getIsUserAuthenticated()
 {
-    const auth = localStorage.getItem("auth");
-    if(!auth || !auth.sessionId) return;
+    const sessionId = getLocalSessionId();
+    if(!sessionId) return false;
 
-    const body = JSON.stringify({ sessionId: auth.sessionId });
-    const res = await fetch(endpoints.sessionInfo, { method: "post", body, headers: { "Content-Type": "application/json" } });
+    const res = await authEndpoints.fetch(authEndpoints.session, { path: { sessionId } });
+    return res.status >= 200 && res.status < 300 || !!saveSession(null);
+}
 
-    return res.status >= 200 && res.status < 300;
+async function getUserInfo()
+{
+    const sessionId = getLocalSessionId();
+    if(!sessionId) return null;
+
+    const res = await authEndpoints.fetch(authEndpoints.sessionInfo, { path: { sessionId } });
+    if(res.status < 200 || res.status >= 300) return null;
+
+    return await res.json();
 }
