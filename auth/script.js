@@ -7,14 +7,6 @@ const endpoints = {
 
 
 
-const spinner = new TemplateTransformation(`<span class="spinner-border text-light"></span>`).create();
-function toggleSpinner(element)
-{
-    if(spinner.parentElement != element) spinner.remove();
-    if(spinner.parentElement) return spinner.remove();
-    element.append(spinner);
-}
-
 function pathRedirect(redirectEndpoint)
 {
     const params = new URLSearchParams(location.search);

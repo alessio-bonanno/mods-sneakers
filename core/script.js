@@ -1,3 +1,13 @@
+const spinner = document.createElement("span");
+spinner.className = "spinner-border text-light";
+function toggleSpinner(element)
+{
+    if(spinner.parentElement != element) spinner.remove();
+    if(spinner.parentElement) return spinner.remove();
+    element.append(spinner);
+}
+
+
 class TemplateTransformation
 {
     constructor(template)
