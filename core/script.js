@@ -1,4 +1,24 @@
+const PORT = 8000;
+const hostnameUsed = location.hostname; // prendo l'hostname in modo dinamico, invede di usare l'ip di loopback, in caso si voglia accedere attraverso ip locale
+
+
 const mainBody = document.querySelector("main");
+
+
+const isTouchSupported = () => "ontouchstart" in window;
+const isMobileWidth = (maxWidthPixel = 768) => window.innerWidth < maxWidthPixel;
+const isMobile = maxWidthPixel => isMobileWidth(maxWidthPixel) && isTouchSupported();
+const capitalize = str => str.split("_").map(sub => sub[0].toUpperCase() + sub.slice(1).toLowerCase()).join(" ");
+
+
+const isUAFirefox = navigator.userAgent.toLowerCase().includes("firefox");
+function scrollWindowTop()
+{
+    if(!isUAFirefox) return scrollTo(0, 0);
+    /* per firefox, da quanto ho provato, non va all'inizio della pagina
+    a meno che non faccia così */
+    else return scrollTo({ top: 0, left: 0, behavior: "instant" });
+}
 
 
 const spinner = document.createElement("span");
