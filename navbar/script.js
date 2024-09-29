@@ -34,6 +34,6 @@ const navbarTemplate = `
 window.addEventListener("load", () =>
 {
     const header = document.querySelector("header") || document.createElement("header");
-    header.prepend(new TemplateTransformation(navbarTemplate).create());
+    header.prepend(new FromTemplate(navbarTemplate).create());
     document.body.prepend(header);
 });

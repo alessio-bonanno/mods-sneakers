@@ -87,7 +87,7 @@ const passwordValidation = {
         Array.from(passwordElement.querySelectorAll(".popover, .error-input")).forEach(element => element.remove());
 
         const errorsText = this.errors();
-        const errorsPopover = new TemplateTransformation(this.popoverErrorTemplate).replace(errorsText).create();
+        const errorsPopover = new FromTemplate(this.popoverErrorTemplate).replace(errorsText).create();
 
         Object.keys(invalidOptions).forEach(key =>
         {
@@ -149,7 +149,7 @@ const signupPanel = {
             if(!invalidElements[key]) return;
 
             const { element, text } = errors[key];
-            element.append(new TemplateTransformation(popoverInputErrorTemplate).replace({ text }).create());
+            element.append(new FromTemplate(popoverInputErrorTemplate).replace({ text }).create());
         });
     },
 
@@ -222,7 +222,7 @@ const forgotPasswordPanel = {
             if(!invalidElements[key]) return;
 
             const { element, text } = errors[key];
-            element.append(new TemplateTransformation(popoverInputErrorTemplate).replace({ text }).create());
+            element.append(new FromTemplate(popoverInputErrorTemplate).replace({ text }).create());
         });
     },
 
