@@ -30,6 +30,20 @@ function toggleSpinner(element)
     element.append(spinner);
 }
 
+const placeholderSelectors = ".placeholder, .placeholder-wave, .placeholder-glow";
+function removePlaceholderClasses(...elements)
+{
+    const placeholderElements = elements.length ?
+        elements.flatMap(el => Array.from(el.querySelectorAll(placeholderSelectors))) :
+        document.querySelectorAll(placeholderSelectors);
+
+    placeholderElements.forEach(el => el.classList.forEach(className =>
+    {
+        if(!className.startsWith("placeholder")) return;
+        el.classList.remove(className);
+    }));
+}
+
 
 class FromTemplate
 {
@@ -143,5 +157,41 @@ class Endpoints
         for(const key in options.path) endpoint = endpoint.replaceAll(`{${key}}`, options.path[key]);
 
         return fetch(`${this.origin}${endpoint}`, requestConfig);
+    }
+}
+
+
+class ErrorPage
+{
+    pageTemplate = `
+    <div class="vw-100 text-center" style="margin-top: 10rem;">
+        <h1 style="font-size: 4rem;">{title}</h1>
+        <p style="font-size: 4rem;">{paragraph}</p>
+    </div>
+    `;
+
+    constructor(title, paragraph, anchorOptions)
+    {
+        let page = new FromTemplate(this.pageTemplate).replace({ title, paragraph });
+
+        for(const endpoint in anchorOptions)
+            page.template = page.template.replaceAll(
+                anchorOptions[endpoint],
+                `<a style="color: var(--palette-green);" href="${endpoint}">${anchorOptions[endpoint]}</a>`
+            );
+
+        this.page = page.create().result;
+    }
+
+    render()
+    {
+        const children = Array.from(mainBody.children);
+        const childrenDisplays = children.map(child => child.style.display);
+        const toggleMainChildren = (displayValue) => children.forEach(child => child.style.display = displayValue);
+
+        toggleMainChildren("none");
+        scrollWindowTop(0, 0);
+        mainBody.append(this.page);
+        window.addEventListener("popstate", () => { this.page.remove(); children.forEach((_, i) => toggleMainChildren(childrenDisplays[i])); });
     }
 }
