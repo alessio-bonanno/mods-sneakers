@@ -3,11 +3,37 @@ from pydantic import BaseModel
 from models import SuccessfulResponse, ErrorResponse, ERROR_STATUS_CODES, get_error
 from uuid import uuid4
 from datetime import datetime, timedelta
+from string import ascii_letters
+from random import choices
+from hashlib import sha256
 from .session_validation import SessionRequest, SessionResponse, get_session_invalid_models, get_session_validation_response
 
 
 
 router = APIRouter()
+
+def get_random_salt():
+    return "".join(choices(ascii_letters, k=32))
+
+"""
+una volta che il server riceve la SHA256 password, viene creata
+una seconda SHA256 hash e aggiunti dei caratteri "random" (pseudo-randomici) come salt.
+tecnicamente, si dovrebbe usare una funzione crittograficamente sicura, es: secrets.token_hex()
+ma, un'utopistica implementazione di un algoritmo di salting, potrebbe anche esser fatta così
+"""
+def create_hashed_password(password: str) -> (str, str):
+    salt = get_random_salt()
+    password += salt
+    
+    hash = sha256()
+    # la stringa deve essere codificata
+    hash.update(password.encode("utf-8"))
+    return hash.hexdigest(), salt
+
+def get_hashed_password(password: str, salt: str):
+    hash = sha256()
+    hash.update((password + salt).encode("utf-8"))
+    return hash.hexdigest()
 
 
 class SignupRequest(BaseModel):
@@ -32,8 +58,9 @@ def signup(req: Request, body: SignupRequest):
     if(cursor.fetchone() is not None):
         return get_error(ERROR_STATUS_CODES.EMAIL_TAKEN)
 
+    password, salt = create_hashed_password(body.password)
     cursor.execute(f"""INSERT INTO user
-                   VALUES (NULL, '{body.username.lower()}', '{body.password}', '{body.email.lower()}', '{body.name}', '{body.last_name}', '{body.gender}')""")
+                   VALUES (NULL, '{body.username.lower()}', '{password}', '{salt}', '{body.email.lower()}', '{body.name}', '{body.last_name}', '{body.gender}')""")
 
     user_id = cursor.lastrowid
     session_id = uuid4()
@@ -54,11 +81,11 @@ class LoginRequest(BaseModel):
 def login(req: Request, body: LoginRequest):
     cursor = req.state.cursor
 
-    cursor.execute(f"SELECT id, password FROM user WHERE username = '{body.username.lower()}'")
+    cursor.execute(f"SELECT id, password, salt FROM user WHERE username = '{body.username.lower()}'")
     user = cursor.fetchone()
     if(user is None):
         return get_error(ERROR_STATUS_CODES.USERNAME_NOT_FOUND)
-    if(user["password"] != body.password):
+    if(user["password"] != get_hashed_password(body.password, user["salt"])):
         return get_error(ERROR_STATUS_CODES.PASSWORD_WRONG)
 
     session_id = uuid4()
@@ -110,7 +137,8 @@ def forgot_password(req: Request, body: ForgotPasswordRequest):
     if(user is None):
         return get_error(ERROR_STATUS_CODES.EMAIL_NOT_FOUND)
 
-    cursor.execute(f"UPDATE user SET password = '{body.password}' WHERE id = {user['id']}")
+    password, salt = create_hashed_password(body.password)
+    cursor.execute(f"UPDATE user SET password = '{password}', salt = '{salt}' WHERE id = {user['id']}")
     cursor.execute(f"DELETE FROM session WHERE user_id = {user['id']}")
 
     conn.commit()
