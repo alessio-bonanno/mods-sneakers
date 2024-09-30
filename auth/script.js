@@ -24,6 +24,35 @@ function showPanel(panelName, panelSendCallback)
 }
 
 
+function bufferToHex(buffer)
+{
+    /*
+     * ArrayBuffer -> Uint8Array per prendere e poter usare i valori all'interno del buffer
+     * Uin8Array -> Array per poter contenere valori diversi da quelli numerici [0, 255]
+    */
+    return Array.from(new Uint8Array(buffer)).map(value =>
+    {
+        const valueHex = value.toString(16); // conversione dal valore [0, 255] al corrispettivo esadecimale, stringa
+        const valueWithPadding = valueHex.padStart(2, "0"); // aggiunge il padding "00" all'inizio, se necessario
+        return valueWithPadding;
+    }).join("");
+}
+
+/*
+ * mando le password sotto forma di hash in modo che il server non riceva mai la password in plaintext.
+ * perché? perché non si sa mai...
+ * https://www.zdnet.com/article/github-says-bug-exposed-account-passwords/
+ * https://aiosplugin.com/all-in-one-security-aios-wordpress-security-plugin-release-5-2-0/
+*/
+async function stringToSHA256(str)
+{
+    // codificata la String -> Uint8Array necessario per SubtleCrypto.digest()
+    const buffer = new TextEncoder().encode(str);
+    const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
+    return bufferToHex(hashBuffer);
+}
+
+
 const loginPanel = {
     usernameInput: document.getElementById("username-login-input"),
     passwordInput: document.getElementById("password-login-input"),
@@ -40,7 +69,7 @@ const loginPanel = {
         const res = await authEndpoints.fetch(authEndpoints.login, {
             method: "post", payload: {
                 username,
-                password: btoa(this.passwordInput.value),
+                password: await stringToSHA256(this.passwordInput.value),
                 should_expire: !this.shouldRememberBox.checked
             }
         });
@@ -177,7 +206,7 @@ const signupPanel = {
         const res = await authEndpoints.fetch(authEndpoints.signup, {
             method: "post", payload: {
                 username: this.usernameInput.value.toLowerCase(),
-                password: btoa(this.passwordInput.value), // algoritmo IN-DE-CI-FRA-BI-LE
+                password: await stringToSHA256(this.passwordInput.value), // algoritmo IN-DE-CI-FRA-BI-LE (per davvero questa volta)
                 email: this.emailInput.value,
                 name: capitalize(this.nameInput.value),
                 last_name: capitalize(this.lastNameInput.value),
@@ -244,7 +273,7 @@ const forgotPasswordPanel = {
         const res = await authEndpoints.fetch(authEndpoints.forgotPassword, {
             method: "patch", payload: {
                 email: this.emailInput.value,
-                password: btoa(this.passwordInput.value)
+                password: await stringToSHA256(this.passwordInput.value)
             }
         });
 
