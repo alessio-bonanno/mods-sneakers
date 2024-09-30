@@ -4,7 +4,7 @@ import mysql.connector
 
 
 config = {
-    "host": "localhost",
+    "host": "db",
     "port": 3306,
     "user": "root",
     "autocommit": True, # conn.commit() ❌
