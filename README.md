@@ -30,6 +30,7 @@
   
     Requisiti:
 
+    - [python](https://www.python.org/downloads/release/python-31110/)
     - [front-end](https://github.com/alessio-bonanno/mods-sneakers/archive/refs/heads/facciata.zip)
     - [back-end](https://github.com/alessio-bonanno/mods-sneakers/archive/refs/heads/didietro.zip)
     - [file .sql](https://github.com/alessio-bonanno/mods-sneakers/releases/download/1.0.0/database.sql) per la creazione del database
@@ -48,9 +49,9 @@
   
 ```bash
   cd mods-sneakers-didietro
-  pip3 install -r requirements.txt
   python3 -m venv venv
   source venv/bin/activate
+  pip3 install -r requirements.txt
   uvicorn main:app
 ```
 
@@ -76,7 +77,7 @@ E allora, perché non crearlo su questa nicchia. Così nasce ModsS. C'è da dire
  - aggiungere più mod
  - pannello scarpe vendute
  - ordinare le chiavi delle risposte. per adesso sono in ordine semi-casuale (es: l'id potrebbe non essere la prima chiave)
- - fix: alcune immagini prese dall'api sono specchiate e hanno un colore di sfondo
+ - fix: alcune immagini prese dall'api sono specchiate e hanno un colore di sfondo, invece di essere trasparenti
  - implementare [<model-viewer\>](https://modelviewer.dev/) per ogni prodotto, con diverse texture per rappresentare i vari colori
 
 
